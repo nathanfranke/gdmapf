@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://qoksoxrnn6m8"]
+
+[ext_resource type="PackedScene" uid="uid://de2emuhd2sms3" path="res://demo/agent/agent.tscn" id="1_sv2vq"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6a7cx"]
+resource_local_to_scene = true
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_r286d"]
+top_radius = 0.75
+bottom_radius = 0.75
+height = 1.0
+
+[node name="AgentLarge" instance=ExtResource( "1_sv2vq" )]
+
+[node name="PathfindingAgent3D" parent="." index="0"]
+region = &"large"
+radius = 1.0
+
+[node name="MeshInstance3D" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+material_override = SubResource( "StandardMaterial3D_6a7cx" )
+mesh = SubResource( "CylinderMesh_r286d" )

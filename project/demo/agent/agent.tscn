@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://de2emuhd2sms3"]
+
+[ext_resource type="Script" path="res://demo/agent/agent.gd" id="1_2lldk"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2md0y"]
+resource_local_to_scene = true
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_s3owc"]
+top_radius = 0.25
+bottom_radius = 0.25
+
+[node name="Agent" type="Node3D" groups=["agent"]]
+script = ExtResource( "1_2lldk" )
+
+[node name="PathfindingAgent3D" type="PathfindingAgent3D" parent="."]
+region = &"small"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+material_override = SubResource( "StandardMaterial3D_2md0y" )
+mesh = SubResource( "CylinderMesh_s3owc" )
