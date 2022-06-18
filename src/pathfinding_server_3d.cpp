@@ -1,6 +1,7 @@
 #include "pathfinding_server_3d.hpp"
 
 #include <queue>
+#include <algorithm>
 
 PathfindingServer3D *PathfindingServer3D::singleton = nullptr;
 
@@ -179,20 +180,10 @@ void PathfindingServer3D::process(const real_t &p_delta)
 {
 	MutexLock lock(mutex);
 
-	static const real_t AGENT_STATIONARY_DENSITY = 10.0;
-	static const real_t AGENT_MOVING_DENSITY = 0.3;
+	//////////
 
-	struct Grid
-	{
-		size_t size;
-		real_t *cells = nullptr;
-	};
-
-	struct GridSystem
-	{
-		Grid density;
-		std::map<PathfindingIndex, Grid> potentials;
-	};
+	// Keep a collection of heap-allocated arrays of some length.
+	// These are re-used essentially every time the server processes.
 
 	static std::map<size_t, std::vector<real_t *>> array_cache;
 
@@ -228,15 +219,119 @@ void PathfindingServer3D::process(const real_t &p_delta)
 		}
 	};
 
-	std::map<RID, GridSystem> region_grid_systems;
+	//////////
 
-	const uint32_t rid_count = agents.get_rid_count();
-	RID *const rids = (RID *)alloca(sizeof(RID) * rid_count);
-	agents.fill_owned_buffer(rids);
-	for (uint32_t i = 0; i < rid_count; i++)
+	// Pathfinding-specific constructs.
+
+	static const real_t AGENT_STATIONARY_DENSITY = 10.0;
+	static const real_t AGENT_MOVING_DENSITY = 0.2;
+
+	struct Grid
 	{
-		const RID rid = rids[i];
-		PathfindingAgent *const agent = agents.get_or_null(rid);
+		size_t size;
+		real_t *cells = nullptr;
+	};
+
+	struct DensityGrid : public Grid
+	{
+	};
+
+	struct PotentialGrid : public Grid
+	{
+		std::vector<PathfindingIndex> required_cells;
+	};
+
+	struct RegionSystem
+	{
+		PathfindingRegion *region;
+
+		Transform3D transform;
+		Transform3D transform_inv;
+		real_t cell_size;
+
+		DensityGrid density;
+		std::map<PathfindingIndex, PotentialGrid> potentials;
+	};
+
+	struct AgentSystem
+	{
+		PathfindingAgent *agent;
+		PathfindingRegion *region;
+
+		PathfindingIndex origin_cell;
+
+		DensityGrid *density;
+		PotentialGrid *potential;
+	};
+
+	/**
+	 * Map of Region RID->Region System.
+	 * +-- Region System (Different system for each PathfindingRegion* node).
+	 * |   +-- transform, transform_inv, cell_size
+	 * |   +-- Density Grid (Occupation of each cell).
+	 * |   |   +-- Size and contents.
+	 * |   +-- Potential Grids (Maps Goal Cell->Potential Grid).
+	 * |   |   +-- Potential Grid (Decreasing value as cells approach goal).
+	 * |   |   |   +-- Size and contents.
+	 * |   |   |   +-- List of required cells.
+	 */
+	std::map<RID, RegionSystem> region_systems;
+
+	/**
+	 * Map of Agent RID->Agent System.
+	 * +-- Agent System
+	 * |   +-- Origin Cell
+	 * |   +-- Goal Cell
+	 */
+	std::map<RID, AgentSystem> agent_systems;
+
+	//////////
+
+	const auto occupy = [&](const RegionSystem &region_system, const Vector3 &p_position, const real_t &p_radius, const real_t &p_weight) -> void
+	{
+		const Transform3D transform_inv = region_system.transform_inv;
+		const real_t cell_size = region_system.cell_size;
+
+		const Vector3 offset(p_radius - 0.001, p_radius - 0.001, p_radius - 0.001);
+
+		const Vector3i from = ((transform_inv.xform(p_position) - offset) / cell_size).floor();
+		const Vector3i to = ((transform_inv.xform(p_position) + offset) / cell_size).floor();
+
+		PathfindingIndex index;
+		for (int x = from.x; x <= to.x; ++x)
+		{
+			for (int y = from.y; y <= to.y; ++y)
+			{
+				for (int z = from.z; z <= to.z; ++z)
+				{
+					const Vector3i voxel = Vector3i(x, y, z);
+					const bool has_voxel = region_system.region->mesh->find_cell(voxel, index);
+					if (has_voxel)
+					{
+						real_t &den = region_system.density.cells[index];
+						den += p_weight;
+
+#ifdef DEBUG_ENABLED
+						PathfindingCell &cell = region_system.region->mesh->get_cell(index);
+						cell.debug_density = den;
+#endif
+					}
+				}
+			}
+		}
+	};
+
+	//////////
+
+	// Step 1: Populate the region and agent systems.
+
+	const uint32_t agent_id_count = agents.get_rid_count();
+	RID *const agent_ids = (RID *)alloca(sizeof(RID) * agent_id_count);
+	agents.fill_owned_buffer(agent_ids);
+	for (uint32_t i = 0; i < agent_id_count; ++i)
+	{
+		const RID agent_id = agent_ids[i];
+		PathfindingAgent *const agent = agents.get_or_null(agent_id);
 		ERR_FAIL_NULL(agent);
 
 		// The agent is not navigating.
@@ -251,145 +346,152 @@ void PathfindingServer3D::process(const real_t &p_delta)
 			continue;
 		}
 
+		// Find the region this agent is navigating on.
 		const RID region_id = find_region(agent->region);
 		PathfindingRegion *const region = regions.get_or_null(region_id);
 		ERR_FAIL_NULL(region);
 
-		const real_t cell_size = region->mesh->get_cell_size();
-		const size_t cell_count = region->mesh->get_cell_count();
-
+		// Read data from region.
 		const Transform3D region_transform = region->transform;
 		const Transform3D region_transform_inv = region_transform.affine_inverse();
+		const real_t cell_size = region->mesh->get_cell_size();
 
-		const auto get_nearest_cell = [&](const Vector3 &p_position, bool &r_valid) -> PathfindingIndex
+		// Helper function to get the cell index given target position.
+		const auto find_cell = [&](const Vector3 &p_position, PathfindingIndex &r_cell) -> bool
 		{
 			static const Vector3i UP(0, 1, 0);
 
 			const Vector3i voxel = (region_transform_inv.xform(p_position) / cell_size).floor();
 
-			PathfindingIndex index;
-			if (region->mesh->find_cell(voxel, index))
+			if (region->mesh->find_cell(voxel, r_cell))
 			{
-				r_valid = true;
-				return index;
+				return true;
 			}
-			if (region->mesh->find_cell(voxel + UP, index))
+			if (region->mesh->find_cell(voxel + UP, r_cell))
 			{
-				r_valid = true;
-				return index;
+				return true;
 			}
-			if (region->mesh->find_cell(voxel - UP, index))
+			if (region->mesh->find_cell(voxel - UP, r_cell))
 			{
-				r_valid = true;
-				return index;
+				return true;
 			}
-
-			r_valid = false;
-			return 0; // Position is not inside the map.
+			return false; // Position is not inside the map.
 		};
 
-		bool has_goal;
-		const PathfindingIndex goal_cell = get_nearest_cell(agent->goal, has_goal);
-		if (!has_goal)
+		// Find the current cell of the agent.
+		PathfindingIndex origin_cell;
+		if (!find_cell(agent->position, origin_cell))
 		{
-			// Cannot find goal.
+			// Cannot find origin cell.
+			agent->is_navigating = false;
+			ERR_PRINT("Agent is not inside the pathfinding region.");
+			continue;
+		}
+
+		// Find the goal cell of the agent.
+		PathfindingIndex goal_cell;
+		if (!find_cell(agent->goal, goal_cell))
+		{
+			// Cannot find goal cell.
 			agent->is_navigating = false;
 			continue;
 		}
 
-		GridSystem &system = region_grid_systems[region_id];
-		Grid &density = system.density;
-		Grid &potential = system.potentials[goal_cell];
+		// Populate region system.
+		RegionSystem &region_system = region_systems[region_id];
+		region_system.region = region;
+		region_system.transform = region_transform;
+		region_system.transform_inv = region_transform_inv;
+		region_system.cell_size = cell_size;
+
+		// Add agent cell to list of required cells.
+		PotentialGrid &goal_potential = region_system.potentials[goal_cell];
+		goal_potential.required_cells.push_back(origin_cell);
+
+		// Populate agent system.
+		AgentSystem &agent_system = agent_systems[agent_id];
+		agent_system.agent = agent;
+		agent_system.region = region;
+		agent_system.origin_cell = origin_cell;
+		agent_system.density = &region_system.density;
+		agent_system.potential = &goal_potential;
+	}
+
+	// UtilityFunctions::print("region systems: ", region_systems.size(), ", agent systems: ", agent_systems.size());
+
+	//////////
+
+	// Step 2: Generate density and potential grids.
+
+	for (std::pair<const RID, RegionSystem> &pair : region_systems)
+	{
+		// Get the region system.
+		RegionSystem &region_system = pair.second;
+		PathfindingRegion *const region = region_system.region;
+
+		// Read data from region.
+		const Transform3D region_transform = region->transform;
+		const Transform3D region_transform_inv = region_transform.affine_inverse();
+		const real_t cell_size = region->mesh->get_cell_size();
+		const size_t cell_count = region->mesh->get_cell_count();
 
 		//////////
 		// DENSITY GRID
 		//////////
 
-		const auto occupy = [&](Grid &p_density, const Vector3 &p_position, const real_t &p_radius, const real_t &p_weight) -> void
-		{
-			const Vector3 offset(p_radius - 0.001, p_radius - 0.001, p_radius - 0.001);
-
-			const Vector3i from = ((region_transform_inv.xform(p_position) - offset) / cell_size).floor();
-			const Vector3i to = ((region_transform_inv.xform(p_position) + offset) / cell_size).floor();
-
-			/*print_line(String() + ((region_transform_inv.xform(p_position) - offset) / cell_size) + " to " + ((region_transform_inv.xform(p_position) + offset) / cell_size));
-			print_line(String() + from + " to " + to);*/
-
-			PathfindingIndex index;
-			for (int x = from.x; x <= to.x; ++x)
-			{
-				for (int y = from.y; y <= to.y; ++y)
-				{
-					for (int z = from.z; z <= to.z; ++z)
-					{
-						const Vector3i voxel = Vector3i(x, y, z);
-						const bool has_voxel = region->mesh->find_cell(voxel, index);
-						if (has_voxel)
-						{
-							real_t &den = p_density.cells[index];
-							den += p_weight;
+		DensityGrid &density = region_system.density;
+		density.cells = get_array(cell_count);
+		std::fill(&density.cells[0], &density.cells[cell_count], 0.0);
 
 #ifdef DEBUG_ENABLED
-							PathfindingCell &cell = region->mesh->get_cell(index);
-							cell.debug_density = den;
-#endif
-						}
-					}
-				}
-			}
-		};
-
-		if (density.cells == nullptr)
+		for (PathfindingCell &cell : region->mesh->get_cells())
 		{
-			density.cells = get_array(cell_count);
-			std::fill(&density.cells[0], &density.cells[cell_count], 0.0);
-
-#ifdef DEBUG_ENABLED
-			for (PathfindingCell &cell : region->mesh->get_cells())
-			{
-				cell.debug_density = 0.0;
-			}
+			cell.debug_density = 0.0;
+			cell.debug_potential = 0.0;
+		}
 #endif
 
-			for (uint32_t j = 0; j < rid_count; j++)
-			{
-				const RID r = rids[j];
-				PathfindingAgent *const a = agents.get_or_null(r);
-				ERR_FAIL_NULL(a);
+		for (uint32_t i = 0; i < agent_id_count; i++)
+		{
+			const RID r = agent_ids[i];
+			PathfindingAgent *const a = agents.get_or_null(r);
+			ERR_FAIL_NULL(a);
 
-				if (a->is_navigating)
-				{
-					occupy(density, a->position, a->radius, AGENT_MOVING_DENSITY);
-					occupy(density, a->next_position, a->radius, AGENT_MOVING_DENSITY);
-				}
-				else
-				{
-					occupy(density, a->position, a->radius, AGENT_STATIONARY_DENSITY);
-				}
+			if (a->is_navigating)
+			{
+				occupy(region_system, a->position, a->radius, AGENT_MOVING_DENSITY);
+				occupy(region_system, a->next_position, a->radius, AGENT_MOVING_DENSITY);
+			}
+			else
+			{
+				occupy(region_system, a->position, a->radius, AGENT_STATIONARY_DENSITY);
 			}
 		}
 
-		//////////
-		// POTENTIAL GRID
-		//////////
-
-		if (potential.cells == nullptr)
+		for (std::pair<const PathfindingIndex, PotentialGrid> &pair : region_system.potentials)
 		{
+			PathfindingIndex goal_cell = pair.first;
+			PotentialGrid &potential = pair.second;
+
+			//////////
+			// POTENTIAL GRID
+			//////////
+
 			potential.cells = get_array(cell_count);
 			std::fill(&potential.cells[0], &potential.cells[cell_count], INFINITY);
 
 			potential.cells[goal_cell] = 0.0;
 
-#ifdef DEBUG_ENABLED
-			region->mesh->get_cell(goal_cell).debug_potential = 0.0;
-#endif
+			std::vector<PathfindingIndex> required = potential.required_cells;
 
 			std::queue<PathfindingIndex> active;
 			active.push(goal_cell);
-			while (!active.empty())
+			while (!active.empty() && !required.empty())
 			{
 				const PathfindingIndex index = active.front();
 				active.pop();
+
+				required.erase(std::remove(required.begin(), required.end(), index), required.end());
 
 				PathfindingCell &cell = region->mesh->get_cell(index);
 				const real_t current_pot = potential.cells[index];
@@ -410,19 +512,36 @@ void PathfindingServer3D::process(const real_t &p_delta)
 				}
 			}
 		}
+	}
+
+	//////////
+
+	// Step 3: Navigate agents along the potential grid.
+
+	for (std::pair<const RID, AgentSystem> &pair : agent_systems)
+	{
+		// Get the agent structure.
+		const RID agent_id = pair.first;
+		PathfindingAgent *const agent = agents.get_or_null(agent_id);
+		ERR_FAIL_NULL(agent);
+
+		// Get the agent system.
+		const AgentSystem &agent_system = pair.second;
+		PathfindingRegion *const region = agent_system.region;
+
+		const PathfindingIndex &origin_cell = agent_system.origin_cell;
+
+		DensityGrid *const density = agent_system.density;
+		PotentialGrid *const potential = agent_system.potential;
 
 		//////////
 		// NAVIGATION
 		//////////
 
-		bool has_agent_cell;
-		const PathfindingIndex current_cell = get_nearest_cell(agent->position, has_agent_cell);
-		ERR_FAIL_COND_MSG(!has_agent_cell, "Agent is not inside the map.");
-
 		// Subtract current cell density to not bias other cells.
-		const real_t current_pot = potential.cells[current_cell] - density.cells[current_cell] + 0.1;
+		const real_t current_pot = potential->cells[origin_cell] - density->cells[origin_cell] + 0.1;
 		real_t best_pot = current_pot;
-		PathfindingIndex best_cell = current_cell;
+		PathfindingIndex best_cell = origin_cell;
 
 		if (unlikely(best_pot <= CMP_EPSILON))
 		{
@@ -430,25 +549,24 @@ void PathfindingServer3D::process(const real_t &p_delta)
 			agent->is_navigating = false;
 		}
 
-		// This shouldn't be possible.
-		/*if (UtilityFunctions::is_inf(best_pot))
+		// Could be possible if optimization is too aggressive.
+		if (UtilityFunctions::is_inf(best_pot))
 		{
-			// Cannot navigate.
 			agent->is_navigating = false;
-		}*/
+		}
 
-		for (const std::pair<const PathfindingIndex, PathfindingConnection> &entry : region->mesh->get_cell(current_cell).connections)
+		for (const std::pair<const PathfindingIndex, PathfindingConnection> &entry : region->mesh->get_cell(origin_cell).connections)
 		{
 			const PathfindingIndex &cell = entry.first;
-			const real_t pot = potential.cells[cell];
+			const real_t pot = potential->cells[cell];
 
-			if (unlikely(density.cells[cell] > CMP_EPSILON))
+			if (unlikely(density->cells[cell] > CMP_EPSILON))
 			{
 				goto density_invalid;
 			}
 			for (const PathfindingIndex obstacle : entry.second.obstacles)
 			{
-				if (unlikely(density.cells[obstacle] > CMP_EPSILON))
+				if (unlikely(density->cells[obstacle] > CMP_EPSILON))
 				{
 					goto density_invalid;
 				}
@@ -464,18 +582,18 @@ void PathfindingServer3D::process(const real_t &p_delta)
 			}
 		}
 
-		if (best_cell == current_cell)
+		if (best_cell == origin_cell)
 		{
-			for (const std::pair<const PathfindingIndex, PathfindingConnection> &entry : region->mesh->get_cell(current_cell).connections)
+			for (const std::pair<const PathfindingIndex, PathfindingConnection> &entry : region->mesh->get_cell(origin_cell).connections)
 			{
 				const PathfindingIndex &cell = entry.first;
-				const real_t pot = potential.cells[cell];
+				const real_t pot = potential->cells[cell];
 
 				// Near destination if:
 				// - Best cell is the current cell (previous statement).
 				// - Adjacent density is a stationary agent.
 				// - Adjacent potential is less than current potential.
-				if (density.cells[cell] >= AGENT_STATIONARY_DENSITY - CMP_EPSILON && pot < current_pot + CMP_EPSILON)
+				if (density->cells[cell] >= AGENT_STATIONARY_DENSITY - CMP_EPSILON && pot < current_pot + CMP_EPSILON)
 				{
 					agent->is_navigating = false;
 				}
@@ -484,14 +602,15 @@ void PathfindingServer3D::process(const real_t &p_delta)
 
 		// print_line(String() + "Next cell: " + String(Variant(best_cell)) + " at " + region->mesh->get_cell(best_cell).voxel + " with density " + String(Variant(density.cells[best_cell])));
 
-		agent->next_position = region_transform.xform(region->mesh->get_cell(best_cell).position);
+		agent->next_position = region->transform.xform(region->mesh->get_cell(best_cell).position);
 
-		for (std::pair<const RID, GridSystem> &grid_systems : region_grid_systems)
+		for (std::pair<const RID, RegionSystem> &pair : region_systems)
 		{
-			occupy(grid_systems.second.density, agent->next_position, agent->radius, AGENT_MOVING_DENSITY);
+			occupy(pair.second, agent->next_position, agent->radius, AGENT_MOVING_DENSITY);
 		}
 	}
 
+	// Returns checked-out arrays back into the pool.
 	flush_arrays();
 }
 
