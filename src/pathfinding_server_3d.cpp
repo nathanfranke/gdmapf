@@ -384,7 +384,10 @@ void PathfindingServer3D::process(const real_t &p_delta)
 		{
 			// Cannot find origin cell.
 			agent->is_navigating = false;
+
+#ifdef DEBUG_ENABLED
 			ERR_PRINT("Agent is not inside the pathfinding region.");
+#endif
 			continue;
 		}
 
@@ -394,6 +397,10 @@ void PathfindingServer3D::process(const real_t &p_delta)
 		{
 			// Cannot find goal cell.
 			agent->is_navigating = false;
+
+#ifdef DEBUG_ENABLED
+			ERR_PRINT("Goal is not inside the pathfinding region.");
+#endif
 			continue;
 		}
 
