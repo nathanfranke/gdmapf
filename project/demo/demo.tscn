@@ -49,7 +49,6 @@ mesh = SubResource( "PathfindingMesh_1g8f4" )
 [node name="LargeRegion" type="PathfindingRegion3D" parent="."]
 id = &"large"
 mesh = SubResource( "PathfindingMesh_ipm6e" )
-visible = false
 
 [node name="World" type="Node3D" parent="."]
 
