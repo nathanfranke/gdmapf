@@ -194,10 +194,7 @@ void PathfindingRegion3D::_ready()
 	_region_update_transform();
 
 #ifdef DEBUG_ENABLED
-	if (Engine::get_singleton()->is_editor_hint())
-	{
-		_debug_init();
-	}
+	_debug_init();
 #endif
 }
 
@@ -207,10 +204,7 @@ void PathfindingRegion3D::_process(double delta)
 	_region_update_transform();
 
 #ifdef DEBUG_ENABLED
-	if (Engine::get_singleton()->is_editor_hint())
-	{
-		_debug_update();
-	}
+	_debug_update();
 #endif
 }
 
