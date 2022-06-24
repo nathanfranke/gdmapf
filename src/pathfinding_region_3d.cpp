@@ -122,6 +122,11 @@ void PathfindingRegion3D::_debug_update()
 		const PathfindingCell &cell = mesh->get_cell(index);
 		PackedVector3Array &verts = lines[(int)(Math::fposmod(cell.debug_potential * 0.1, 1.0) * debug_cell_materials.size())];
 
+		if (cell.debug_density >= 1000.0)
+		{
+			continue;
+		}
+
 		wireframe_cube(cell.position - Vector3(0.3, 0.3, 0.3) * mesh->get_cell_size(), Vector3(0.6, 0.6, 0.6) * mesh->get_cell_size(), verts);
 
 		real_t best_pot = cell.debug_potential - cell.debug_density;

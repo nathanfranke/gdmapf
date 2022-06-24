@@ -15,6 +15,8 @@ void PathfindingAgent3D::_bind_methods()
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "radius"), "set_radius", "get_radius");
 
 	ClassDB::bind_method(D_METHOD("navigate", "goal"), &PathfindingAgent3D::navigate);
+	ClassDB::bind_method(D_METHOD("stop"), &PathfindingAgent3D::stop);
+
 	ClassDB::bind_method(D_METHOD("is_navigating"), &PathfindingAgent3D::is_navigating);
 	ClassDB::bind_method(D_METHOD("get_next_position"), &PathfindingAgent3D::get_next_position);
 }

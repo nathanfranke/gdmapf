@@ -223,8 +223,9 @@ void PathfindingServer3D::process(const real_t &p_delta)
 
 	// Pathfinding-specific constructs.
 
-	static const real_t AGENT_STATIONARY_DENSITY = 10.0;
-	static const real_t AGENT_MOVING_DENSITY = 0.2;
+	static const real_t AGENT_STATIONARY_DENSITY = 1000.0;
+	static const real_t AGENT_MOVING_DENSITY = 1.5;
+	static const int REQUIRED_EXTRA_ITERATIONS = 5; // Iterations to continue after required cells found.
 
 	struct Grid
 	{
@@ -491,32 +492,38 @@ void PathfindingServer3D::process(const real_t &p_delta)
 
 			std::vector<PathfindingIndex> required = potential.required_cells;
 
-			std::queue<PathfindingIndex> active;
-			active.push(goal_cell);
-			while (!active.empty() && !required.empty())
+			int required_extra = REQUIRED_EXTRA_ITERATIONS;
+
+			std::vector<PathfindingIndex> active;
+			active.push_back(goal_cell);
+			while (!active.empty() && (!required.empty() || --required_extra >= 0))
 			{
-				const PathfindingIndex index = active.front();
-				active.pop();
+				std::vector<PathfindingIndex> next_active;
 
-				required.erase(std::remove(required.begin(), required.end(), index), required.end());
-
-				PathfindingCell &cell = region->mesh->get_cell(index);
-				const real_t current_pot = potential.cells[index];
-
-				for (const std::pair<const PathfindingIndex, PathfindingConnection> &entry : cell.connections)
+				for (const PathfindingIndex index : active)
 				{
-					real_t &next_pot = potential.cells[entry.first];
-					const real_t new_pot = current_pot + entry.second.weight + density.cells[entry.first];
-					if (new_pot < next_pot)
+					required.erase(std::remove(required.begin(), required.end(), index), required.end());
+
+					PathfindingCell &cell = region->mesh->get_cell(index);
+					const real_t current_pot = potential.cells[index];
+
+					for (const std::pair<const PathfindingIndex, PathfindingConnection> &entry : cell.connections)
 					{
-						next_pot = new_pot;
-						active.push(entry.first);
+						real_t &next_pot = potential.cells[entry.first];
+						const real_t new_pot = current_pot + entry.second.weight + density.cells[entry.first];
+						if (new_pot < next_pot)
+						{
+							next_pot = new_pot;
+							next_active.push_back(entry.first);
 
 #ifdef DEBUG_ENABLED
-						region->mesh->get_cell(entry.first).debug_potential = next_pot;
+							region->mesh->get_cell(entry.first).debug_potential = next_pot;
 #endif
+						}
 					}
 				}
+
+				active = next_active;
 			}
 		}
 	}
