@@ -10,12 +10,12 @@ top_radius = 0.25
 bottom_radius = 0.25
 
 [node name="Agent" type="Node3D" groups=["agent"]]
-script = ExtResource( "1_2lldk" )
+script = ExtResource("1_2lldk")
 
 [node name="PathfindingAgent3D" type="PathfindingAgent3D" parent="."]
 region = &"small"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
-material_override = SubResource( "StandardMaterial3D_2md0y" )
-mesh = SubResource( "CylinderMesh_s3owc" )
+material_override = SubResource("StandardMaterial3D_2md0y")
+mesh = SubResource("CylinderMesh_s3owc")

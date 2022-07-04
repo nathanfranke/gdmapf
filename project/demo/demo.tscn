@@ -22,11 +22,11 @@ sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
 ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
 
 [sub_resource type="Sky" id="Sky_6wvar"]
-sky_material = SubResource( "ProceduralSkyMaterial_icf4h" )
+sky_material = SubResource("ProceduralSkyMaterial_icf4h")
 
 [sub_resource type="Environment" id="Environment_e3c8v"]
 background_mode = 2
-sky = SubResource( "Sky_6wvar" )
+sky = SubResource("Sky_6wvar")
 tonemap_mode = 2
 glow_enabled = true
 
@@ -40,15 +40,15 @@ size = Vector3(2, 2, 2)
 size = Vector3(2, 2, 2)
 
 [node name="Demo" type="Node3D"]
-script = ExtResource( "1_6gvlp" )
+script = ExtResource("1_6gvlp")
 
 [node name="SmallRegion" type="PathfindingRegion3D" parent="."]
 id = &"small"
-mesh = SubResource( "PathfindingMesh_1g8f4" )
+mesh = SubResource("PathfindingMesh_1g8f4")
 
 [node name="LargeRegion" type="PathfindingRegion3D" parent="."]
 id = &"large"
-mesh = SubResource( "PathfindingMesh_ipm6e" )
+mesh = SubResource("PathfindingMesh_ipm6e")
 
 [node name="World" type="Node3D" parent="."]
 
@@ -56,13 +56,13 @@ mesh = SubResource( "PathfindingMesh_ipm6e" )
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Ground"]
-mesh = SubResource( "BoxMesh_ucckm" )
+mesh = SubResource("BoxMesh_ucckm")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Ground"]
-shape = SubResource( "BoxShape3D_kxg6g" )
+shape = SubResource("BoxShape3D_kxg6g")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
-environment = SubResource( "Environment_e3c8v" )
+environment = SubResource("Environment_e3c8v")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="World"]
 transform = Transform3D(-0.866024, -0.433016, 0.250001, 0, 0.499998, 0.866026, -0.500003, 0.749999, -0.43301, 0, 0, 0)
@@ -75,252 +75,252 @@ directional_shadow_max_distance = 250.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1, -5)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle1"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle1"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle2" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 1, -5)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle2"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle2"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle3" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, -6)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle3"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle3"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle4" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1, -7)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle4"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle4"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle5" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, -6)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle5"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle5"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle6" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, -1)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle6"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle6"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle7" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 1, 1)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle7"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle7"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle8" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1, 3)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle8"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle8"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle9" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, 4)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle9"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle9"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle10" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 1, 4)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle10"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle10"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle11" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 1, 9)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle11"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle11"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle12" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1, 7)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle12"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle12"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle13" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 1, 6)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle13"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle13"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle14" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 7)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle14"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle14"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle15" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1, 9)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle15"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle15"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle16" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 1, 7)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle16"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle16"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle17" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 1, 8)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle17"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle17"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle18" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, 6)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle18"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle18"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle19" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 1, 4)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle19"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle19"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle20" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 1, -3)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle20"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle20"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle21" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle21"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle21"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Obstacle22" type="StaticBody3D" parent="World/Obstacles"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 1, -8)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="World/Obstacles/Obstacle22"]
-material_override = SubResource( "StandardMaterial3D_bblen" )
-mesh = SubResource( "BoxMesh_32xfn" )
+material_override = SubResource("StandardMaterial3D_bblen")
+mesh = SubResource("BoxMesh_32xfn")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/Obstacles/Obstacle22"]
-shape = SubResource( "BoxShape3D_x4fpc" )
+shape = SubResource("BoxShape3D_x4fpc")
 
 [node name="Agents" type="Node3D" parent="."]
 
-[node name="Agent1" parent="Agents" instance=ExtResource( "2_6c3vd" )]
+[node name="Agent1" parent="Agents" instance=ExtResource("2_6c3vd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0.5)
 
-[node name="Agent2" parent="Agents" instance=ExtResource( "2_6c3vd" )]
+[node name="Agent2" parent="Agents" instance=ExtResource("2_6c3vd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0.5)
 
-[node name="Agent3" parent="Agents" instance=ExtResource( "2_6c3vd" )]
+[node name="Agent3" parent="Agents" instance=ExtResource("2_6c3vd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, 0.5)
 
-[node name="Agent4" parent="Agents" instance=ExtResource( "2_6c3vd" )]
+[node name="Agent4" parent="Agents" instance=ExtResource("2_6c3vd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 0.5)
 
-[node name="Agent5" parent="Agents" instance=ExtResource( "2_6c3vd" )]
+[node name="Agent5" parent="Agents" instance=ExtResource("2_6c3vd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 1.5)
 
-[node name="Agent6" parent="Agents" instance=ExtResource( "2_6c3vd" )]
+[node name="Agent6" parent="Agents" instance=ExtResource("2_6c3vd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 1.5)
 
-[node name="Agent7" parent="Agents" instance=ExtResource( "2_6c3vd" )]
+[node name="Agent7" parent="Agents" instance=ExtResource("2_6c3vd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, 0, 1.5)
 
-[node name="Agent8" parent="Agents" instance=ExtResource( "2_6c3vd" )]
+[node name="Agent8" parent="Agents" instance=ExtResource("2_6c3vd")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 1.5)
 
-[node name="AgentLarge1" parent="Agents" instance=ExtResource( "3_vmmkk" )]
+[node name="AgentLarge1" parent="Agents" instance=ExtResource("3_vmmkk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 3)
 
-[node name="AgentLarge2" parent="Agents" instance=ExtResource( "3_vmmkk" )]
+[node name="AgentLarge2" parent="Agents" instance=ExtResource("3_vmmkk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 3)
 
 [node name="Camera3D" type="Camera3D" parent="."]
