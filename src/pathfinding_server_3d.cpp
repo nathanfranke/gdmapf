@@ -141,8 +141,8 @@ void PathfindingServer3D::agent_navigate(const RID &p_agent, const Vector3 &p_go
 	agent->goal = p_goal;
 
 	// Causes the agent to stop the current movement.
-	// Could cause the agent to intersect with another.
-	// agent->next_position = agent->position;
+	// Needed to initialize next_position to a non-zero vector.
+	agent->next_position = agent->position;
 }
 
 void PathfindingServer3D::agent_stop(const RID &p_agent)
@@ -223,7 +223,7 @@ void PathfindingServer3D::process(const real_t &p_delta)
 
 	// Pathfinding-specific constructs.
 
-	static const real_t AGENT_STATIONARY_DENSITY = 1000.0;
+	static const real_t AGENT_STATIONARY_DENSITY = 50.0;
 	static const real_t AGENT_MOVING_DENSITY = 1.5;
 	static const int REQUIRED_EXTRA_ITERATIONS = 5; // Iterations to continue after required cells found.
 
