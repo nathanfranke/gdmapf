@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 
+#include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/resource.hpp>
 
 #include "model/pathfinding_cell.hpp"

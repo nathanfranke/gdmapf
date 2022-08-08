@@ -2,7 +2,8 @@
 
 #ifdef DEBUG_ENABLED
 
-/*#include <godot_cpp/classes/editor_plugin.hpp>
+/*#include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/classes/editor_plugin.hpp>
 #include <godot_cpp/classes/control.hpp>
 
 #include "pathfinding_region_3d.hpp"

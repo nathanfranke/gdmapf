@@ -2,12 +2,13 @@
 
 #include <map>
 
+#include <godot_cpp/core/class_db.hpp>
+#include <godot_cpp/core/mutex_lock.hpp>
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/classes/mutex.hpp>
 #include <godot_cpp/classes/node3d.hpp>
 #include <godot_cpp/classes/object.hpp>
 #include <godot_cpp/classes/thread.hpp>
-#include <godot_cpp/core/mutex_lock.hpp>
 #include <godot_cpp/templates/rid_owner.hpp>
 
 #include "model/pathfinding_agent.hpp"

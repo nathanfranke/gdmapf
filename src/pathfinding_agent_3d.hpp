@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/mesh_instance3d.hpp>
 #include <godot_cpp/classes/node3d.hpp>
 
